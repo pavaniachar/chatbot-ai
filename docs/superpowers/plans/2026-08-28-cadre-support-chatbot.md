@@ -89,6 +89,16 @@ Create `vitest.setup.ts`:
 
 ```ts
 import '@testing-library/jest-dom/vitest';
+import { cleanup } from '@testing-library/react';
+import { afterEach } from 'vitest';
+
+// vitest.config.mts does not set test.globals: true, so React Testing
+// Library's automatic afterEach-based cleanup never registers. Without
+// this, DOM from one test's render() bleeds into the next test in the
+// same file.
+afterEach(() => {
+  cleanup();
+});
 
 // jsdom does not implement scrollIntoView; MessageList calls it on every
 // message update to auto-scroll.
