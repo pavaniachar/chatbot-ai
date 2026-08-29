@@ -30,7 +30,7 @@ export function ChatWindow() {
   };
 
   return (
-    <div className="flex h-dvh flex-col bg-gradient-to-b from-zinc-950 via-zinc-950 to-zinc-900">
+    <div className="flex h-dvh w-full flex-col overflow-hidden bg-white sm:h-[85dvh] sm:max-h-[820px] sm:w-full sm:max-w-2xl sm:rounded-3xl sm:border sm:border-zinc-200 sm:shadow-xl sm:shadow-zinc-900/10">
       <ChatHeader onReset={handleReset} />
       <div className="flex flex-1 flex-col overflow-hidden">
         {messages.length === 0 ? (
