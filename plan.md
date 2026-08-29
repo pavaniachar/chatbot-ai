@@ -50,3 +50,10 @@ it shipped).
 4. Conversation persistence + transcript handoff on escalation.
 5. Automated answer-quality evals (today, `/chat-eval` is a manual
    spot-check).
+6. Prompt caching (OpenRouter's `cache_control` passthrough to Anthropic)
+   for the static system prompt, plus context compaction (summarizing
+   dropped turns instead of `trimHistory`'s hard cutoff) for conversations
+   that run long.
+7. Localizing the UI chrome (input placeholder, button labels, suggested
+   prompts) — the model already replies in whatever language a user
+   writes in, since `system-prompt.ts` has no language constraint.
