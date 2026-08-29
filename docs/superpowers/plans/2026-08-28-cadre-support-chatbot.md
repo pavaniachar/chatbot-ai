@@ -587,8 +587,8 @@ describe('SYSTEM_PROMPT', () => {
     expect(SYSTEM_PROMPT.toLowerCase()).not.toContain('is certified');
   });
 
-  it('does not invent pricing', () => {
-    expect(SYSTEM_PROMPT).not.toMatch(/\$\d/);
+  it('instructs against inventing pricing', () => {
+    expect(SYSTEM_PROMPT).toContain('Never invent a number');
   });
 
   it('includes the scope guard and escalation instructions', () => {
@@ -832,8 +832,10 @@ Create `tests/app/api/chat/route.test.ts`:
 ```ts
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
-const streamTextMock = vi.fn();
-const checkMock = vi.fn();
+const { streamTextMock, checkMock } = vi.hoisted(() => ({
+  streamTextMock: vi.fn(),
+  checkMock: vi.fn(),
+}));
 
 vi.mock('ai', async (importOriginal) => {
   const actual = await importOriginal<typeof import('ai')>();
