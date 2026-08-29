@@ -31,7 +31,10 @@ export function MessageBubble({ role, text, isStreaming = false }: MessageBubble
       className={`flex w-full items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       {!isUser && (
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
+        <div
+          aria-hidden="true"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white"
+        >
           CA
         </div>
       )}
@@ -42,13 +45,15 @@ export function MessageBubble({ role, text, isStreaming = false }: MessageBubble
             : 'border border-zinc-200 bg-zinc-50 text-zinc-800'
         }`}
       >
+        <span className="sr-only">{isUser ? 'You: ' : 'Cadre AI: '}</span>
         <div className="[&_p]:my-1 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_a]:underline">
           <ReactMarkdown components={markdownComponents}>{text}</ReactMarkdown>
         </div>
         {isStreaming && (
           <span
             data-testid="streaming-cursor"
-            className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-zinc-400 align-middle"
+            aria-hidden="true"
+            className="ml-0.5 inline-block h-3.5 w-1.5 animate-pulse bg-zinc-400 align-middle motion-reduce:animate-none"
           />
         )}
       </div>

@@ -30,6 +30,13 @@ describe('MessageBubble', () => {
     expect(screen.queryByTestId('streaming-cursor')).not.toBeInTheDocument();
   });
 
+  it('exposes an assistive-tech speaker label distinguishing user and assistant', () => {
+    render(<MessageBubble role="user" text="Hi" />);
+    render(<MessageBubble role="assistant" text="Hello" />);
+    expect(screen.getByText('You:', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('Cadre AI:', { exact: false })).toBeInTheDocument();
+  });
+
   it('opens markdown links in a new tab', () => {
     render(
       <MessageBubble

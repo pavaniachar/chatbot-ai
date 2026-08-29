@@ -42,4 +42,9 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText(/ask about cadre ai/i)).toBeDisabled();
     expect(screen.getByRole('button', { name: /send/i })).toBeDisabled();
   });
+
+  it('exposes an accessible name for the message input independent of the placeholder', () => {
+    render(<ChatInput onSubmit={vi.fn()} />);
+    expect(screen.getByRole('textbox', { name: /message cadre ai/i })).toBeInTheDocument();
+  });
 });

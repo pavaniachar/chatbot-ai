@@ -16,4 +16,9 @@ describe('SuggestedPrompts', () => {
     fireEvent.click(screen.getByText(SUGGESTED_PROMPTS[0]));
     expect(onSelect).toHaveBeenCalledWith(SUGGESTED_PROMPTS[0]);
   });
+
+  it('groups the prompts under their visible "Try asking" label for assistive tech', () => {
+    render(<SuggestedPrompts onSelect={vi.fn()} />);
+    expect(screen.getByRole('group', { name: /try asking/i })).toBeInTheDocument();
+  });
 });

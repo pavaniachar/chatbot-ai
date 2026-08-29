@@ -17,8 +17,10 @@ export interface SuggestedPromptsProps {
 export function SuggestedPrompts({ onSelect }: SuggestedPromptsProps) {
   return (
     <div className="flex flex-1 flex-col justify-end gap-3 p-4">
-      <p className="px-1 text-xs font-medium text-zinc-400">Try asking:</p>
-      <div className="flex flex-wrap gap-2">
+      <p id="suggested-prompts-label" className="px-1 text-xs font-medium text-zinc-500">
+        Try asking:
+      </p>
+      <div role="group" aria-labelledby="suggested-prompts-label" className="flex flex-wrap gap-2">
         {SUGGESTED_PROMPTS.map((prompt, index) => (
           <motion.button
             key={prompt}

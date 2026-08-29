@@ -36,4 +36,9 @@ describe('MessageList', () => {
     render(<MessageList messages={messages} status="streaming" />);
     expect(screen.getByTestId('streaming-cursor')).toBeInTheDocument();
   });
+
+  it('exposes the conversation as an assistive-tech live region', () => {
+    render(<MessageList messages={[textMessage('1', 'user', 'Hi')]} status="ready" />);
+    expect(screen.getByRole('log', { name: /conversation/i })).toBeInTheDocument();
+  });
 });

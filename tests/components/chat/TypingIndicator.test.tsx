@@ -7,4 +7,9 @@ describe('TypingIndicator', () => {
     render(<TypingIndicator />);
     expect(screen.getByTestId('typing-indicator')).toBeInTheDocument();
   });
+
+  it('announces itself to assistive tech as a status update', () => {
+    render(<TypingIndicator />);
+    expect(screen.getByRole('status')).toHaveTextContent(/typing/i);
+  });
 });

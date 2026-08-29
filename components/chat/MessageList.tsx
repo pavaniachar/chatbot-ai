@@ -45,10 +45,16 @@ export function MessageList({ messages, status }: MessageListProps) {
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b from-white to-transparent" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b from-white to-transparent"
+      />
       <div
         ref={containerRef}
         onScroll={handleScroll}
+        role="log"
+        aria-live="polite"
+        aria-label="Conversation with Cadre AI support assistant"
         className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4"
       >
         {visibleMessages.map((message, index) => (
@@ -79,7 +85,7 @@ export function MessageList({ messages, status }: MessageListProps) {
             onClick={scrollToBottom}
             className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 shadow-md transition hover:border-zinc-400 hover:text-zinc-900"
           >
-            ↓ Jump to latest
+            <span aria-hidden="true">↓</span> Jump to latest
           </motion.button>
         )}
       </AnimatePresence>

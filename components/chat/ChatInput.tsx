@@ -51,6 +51,7 @@ export function ChatInput({ onSubmit, disabled = false }: ChatInputProps) {
         onKeyDown={handleKeyDown}
         disabled={disabled}
         rows={1}
+        aria-label="Message Cadre AI's support assistant"
         placeholder="Ask about Cadre AI's services, pricing, or how to get started..."
         className="min-w-0 flex-1 resize-none overflow-y-hidden rounded-2xl border border-zinc-300 bg-white px-3.5 py-2.5 text-base text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400 disabled:opacity-50 sm:text-sm"
       />
