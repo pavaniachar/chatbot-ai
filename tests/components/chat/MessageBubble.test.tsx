@@ -29,4 +29,17 @@ describe('MessageBubble', () => {
     render(<MessageBubble role="assistant" text="Done" />);
     expect(screen.queryByTestId('streaming-cursor')).not.toBeInTheDocument();
   });
+
+  it('opens markdown links in a new tab', () => {
+    render(
+      <MessageBubble
+        role="assistant"
+        text="Reach out at [cadreai.com/contact](https://cadreai.com/contact)"
+      />
+    );
+    const link = screen.getByRole('link', { name: 'cadreai.com/contact' });
+    expect(link).toHaveAttribute('href', 'https://cadreai.com/contact');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
 });
