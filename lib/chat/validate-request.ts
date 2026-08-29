@@ -1,10 +1,15 @@
 import { z } from 'zod';
 import type { UIMessage } from 'ai';
 
-const chatPartSchema = z.object({
-  type: z.literal('text'),
-  text: z.string().min(1).max(4000),
-});
+const chatPartSchema = z.union([
+  z.object({
+    type: z.literal('text'),
+    text: z.string().min(1).max(4000),
+  }),
+  z.object({
+    type: z.literal('step-start'),
+  }),
+]);
 
 const chatMessageSchema = z.object({
   id: z.string().min(1),

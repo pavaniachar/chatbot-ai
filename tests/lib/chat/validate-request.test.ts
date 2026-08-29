@@ -87,4 +87,18 @@ describe('parseChatRequest', () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it('accepts an assistant message with a leading step-start part', () => {
+    const result = parseChatRequest({
+      messages: [
+        { id: '1', role: 'user', parts: [{ type: 'text', text: 'hi' }] },
+        {
+          id: '2',
+          role: 'assistant',
+          parts: [{ type: 'step-start' }, { type: 'text', text: 'hello' }],
+        },
+      ],
+    });
+    expect(result.success).toBe(true);
+  });
 });
