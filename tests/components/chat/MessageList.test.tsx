@@ -1,11 +1,25 @@
-import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import type { UIMessage } from 'ai';
 import { MessageList } from '@/components/chat/MessageList';
 
 function textMessage(id: string, role: 'user' | 'assistant', text: string): UIMessage {
   return { id, role, parts: [{ type: 'text', text }] };
 }
+
+/**
+ * jsdom reports 0 for every scroll dimension, so the geometry the component
+ * reads has to be defined explicitly before dispatching a scroll event.
+ */
+function setScrollPosition(container: HTMLElement, scrollTop: number) {
+  Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true });
+  Object.defineProperty(container, 'clientHeight', { value: 300, configurable: true });
+  Object.defineProperty(container, 'scrollTop', { value: scrollTop, configurable: true });
+  fireEvent.scroll(container);
+}
+
+const SCROLLED_TO_BOTTOM = 700; // 1000 - 300
+const SCROLLED_UP = 0;
 
 describe('MessageList', () => {
   it('renders each message in order', () => {
@@ -40,5 +54,82 @@ describe('MessageList', () => {
   it('exposes the conversation as an assistive-tech live region', () => {
     render(<MessageList messages={[textMessage('1', 'user', 'Hi')]} status="ready" />);
     expect(screen.getByRole('log', { name: /conversation/i })).toBeInTheDocument();
+  });
+
+  describe('auto-scroll', () => {
+    let scrollIntoView: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      scrollIntoView = vi
+        .spyOn(Element.prototype, 'scrollIntoView')
+        .mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      scrollIntoView.mockRestore();
+    });
+
+    it('follows new messages while the reader is at the bottom', () => {
+      const messages = [textMessage('1', 'user', 'Hi')];
+      const { rerender } = render(<MessageList messages={messages} status="streaming" />);
+
+      scrollIntoView.mockClear();
+      rerender(
+        <MessageList
+          messages={[...messages, textMessage('2', 'assistant', 'Hello')]}
+          status="streaming"
+        />,
+      );
+
+      expect(scrollIntoView).toHaveBeenCalled();
+    });
+
+    it('stops following once the reader scrolls up to read earlier replies', () => {
+      const messages = [textMessage('1', 'user', 'Hi')];
+      const { rerender } = render(<MessageList messages={messages} status="streaming" />);
+
+      setScrollPosition(screen.getByRole('log'), SCROLLED_UP);
+      scrollIntoView.mockClear();
+
+      // A streamed token arrives while the reader is still scrolled up.
+      rerender(
+        <MessageList
+          messages={[...messages, textMessage('2', 'assistant', 'Hello')]}
+          status="streaming"
+        />,
+      );
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('resumes following after the reader jumps back to the latest message', () => {
+      const messages = [textMessage('1', 'user', 'Hi')];
+      const { rerender } = render(<MessageList messages={messages} status="streaming" />);
+
+      setScrollPosition(screen.getByRole('log'), SCROLLED_UP);
+      fireEvent.click(screen.getByRole('button', { name: /jump to latest/i }));
+      scrollIntoView.mockClear();
+
+      rerender(
+        <MessageList
+          messages={[...messages, textMessage('2', 'assistant', 'Hello')]}
+          status="streaming"
+        />,
+      );
+
+      expect(scrollIntoView).toHaveBeenCalled();
+    });
+
+    it('hides the jump affordance once the reader is back at the bottom', async () => {
+      render(<MessageList messages={[textMessage('1', 'user', 'Hi')]} status="ready" />);
+      const log = screen.getByRole('log');
+
+      setScrollPosition(log, SCROLLED_UP);
+      const jumpButton = screen.getByRole('button', { name: /jump to latest/i });
+
+      setScrollPosition(log, SCROLLED_TO_BOTTOM);
+      // The affordance animates out, so it lingers in the DOM for a frame.
+      await waitForElementToBeRemoved(jumpButton);
+    });
   });
 });

@@ -8,6 +8,13 @@ import { TypingIndicator } from './TypingIndicator';
 
 const NEAR_BOTTOM_THRESHOLD_PX = 80;
 
+/** A message the chat surface actually renders — `system` never reaches the UI. */
+type DisplayMessage = UIMessage & { role: 'user' | 'assistant' };
+
+function isDisplayMessage(message: UIMessage): message is DisplayMessage {
+  return message.role === 'user' || message.role === 'assistant';
+}
+
 function getMessageText(message: UIMessage): string {
   return message.parts
     .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
@@ -25,7 +32,16 @@ export function MessageList({ messages, status }: MessageListProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
+  // Held in a ref, not state: the auto-scroll effect needs the latest value
+  // without re-running when it changes, which would itself trigger a scroll.
+  const isPinnedToBottomRef = useRef(true);
+
   useEffect(() => {
+    // Streaming produces a new `messages` array per token, so this effect runs
+    // on every delta. Following the stream is only wanted while the reader is
+    // already at the bottom — otherwise each token would yank them back down
+    // mid-sentence while they scroll up to re-read an earlier reply.
+    if (!isPinnedToBottomRef.current) return;
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, status]);
 
@@ -34,14 +50,20 @@ export function MessageList({ messages, status }: MessageListProps) {
     if (!container) return;
     const distanceFromBottom =
       container.scrollHeight - container.scrollTop - container.clientHeight;
-    setShowScrollButton(distanceFromBottom > NEAR_BOTTOM_THRESHOLD_PX);
+    const hasScrolledAway = distanceFromBottom > NEAR_BOTTOM_THRESHOLD_PX;
+    isPinnedToBottomRef.current = !hasScrolledAway;
+    setShowScrollButton(hasScrolledAway);
   };
 
   const scrollToBottom = () => {
+    // Re-pin explicitly: without this, jumping back would scroll once and then
+    // never follow the stream again.
+    isPinnedToBottomRef.current = true;
+    setShowScrollButton(false);
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const visibleMessages = messages.filter((message) => message.role !== 'system');
+  const visibleMessages = messages.filter(isDisplayMessage);
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
@@ -60,7 +82,7 @@ export function MessageList({ messages, status }: MessageListProps) {
         {visibleMessages.map((message, index) => (
           <MessageBubble
             key={message.id}
-            role={message.role as 'user' | 'assistant'}
+            role={message.role}
             text={getMessageText(message)}
             isStreaming={
               status === 'streaming' &&
