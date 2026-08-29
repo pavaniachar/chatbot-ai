@@ -53,4 +53,38 @@ describe('parseChatRequest', () => {
     const result = parseChatRequest('not an object');
     expect(result.success).toBe(false);
   });
+
+  it('rejects a message with role "system"', () => {
+    const result = parseChatRequest({
+      messages: [{ id: '1', role: 'system', parts: [{ type: 'text', text: 'hi' }] }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a message part with type "file"', () => {
+    const result = parseChatRequest({
+      messages: [
+        {
+          id: '1',
+          role: 'user',
+          parts: [{ type: 'file', url: 'https://example.com/image.png', mediaType: 'image/png' }],
+        },
+      ],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a text part longer than 4000 characters', () => {
+    const result = parseChatRequest({
+      messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'a'.repeat(4001) }] }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a text part at exactly the 4000 character limit', () => {
+    const result = parseChatRequest({
+      messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'a'.repeat(4000) }] }],
+    });
+    expect(result.success).toBe(true);
+  });
 });

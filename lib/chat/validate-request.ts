@@ -1,11 +1,14 @@
 import { z } from 'zod';
 import type { UIMessage } from 'ai';
 
-const chatPartSchema = z.looseObject({ type: z.string() });
+const chatPartSchema = z.object({
+  type: z.literal('text'),
+  text: z.string().min(1).max(4000),
+});
 
 const chatMessageSchema = z.object({
   id: z.string().min(1),
-  role: z.enum(['user', 'assistant', 'system']),
+  role: z.enum(['user', 'assistant']),
   parts: z.array(chatPartSchema).min(1),
 });
 
