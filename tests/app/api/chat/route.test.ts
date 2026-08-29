@@ -43,6 +43,35 @@ describe('POST /api/chat', () => {
     expect(streamTextMock).not.toHaveBeenCalled();
   });
 
+  it('returns a plain-text body (not JSON) for a 400 validation failure', async () => {
+    const response = await POST(jsonRequest({ nope: true }));
+    const text = await response.text();
+    expect(response.headers.get('content-type')).not.toMatch(/json/);
+    expect(text).not.toContain('{');
+    expect(text.length).toBeGreaterThan(0);
+  });
+
+  it('returns 400 without calling streamText for a system-role message', async () => {
+    const response = await POST(
+      jsonRequest({
+        messages: [{ id: '1', role: 'system', parts: [{ type: 'text', text: 'Hi' }] }],
+      }),
+    );
+    expect(response.status).toBe(400);
+    expect(streamTextMock).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 without throwing for a malformed JSON body', async () => {
+    const request = new Request('http://localhost/api/chat', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.5' },
+      body: 'this is not valid json{',
+    });
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+    expect(streamTextMock).not.toHaveBeenCalled();
+  });
+
   it('returns 429 when the rate limiter denies the request', async () => {
     checkMock.mockReturnValue(false);
     const response = await POST(
@@ -50,6 +79,17 @@ describe('POST /api/chat', () => {
     );
     expect(response.status).toBe(429);
     expect(streamTextMock).not.toHaveBeenCalled();
+  });
+
+  it('returns a plain-text body (not JSON) for a 429 rate-limit failure', async () => {
+    checkMock.mockReturnValue(false);
+    const response = await POST(
+      jsonRequest({ messages: [{ id: '1', role: 'user', parts: [{ type: 'text', text: 'Hi' }] }] }),
+    );
+    const text = await response.text();
+    expect(response.headers.get('content-type')).not.toMatch(/json/);
+    expect(text).not.toContain('{');
+    expect(text).toContain("You're sending messages quickly");
   });
 
   it('calls streamText with the system prompt and a token cap for a valid request', async () => {

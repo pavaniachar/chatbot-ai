@@ -10,19 +10,24 @@ import { mapErrorToUserMessage } from '@/lib/chat/errors';
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const body: unknown = await req.json();
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return new Response('Invalid request body.', { status: 400 });
+  }
+
   const parsed = parseChatRequest(body);
 
   if (!parsed.success) {
-    return Response.json({ error: parsed.error }, { status: 400 });
+    return new Response(parsed.error, { status: 400 });
   }
 
   const clientIp = getClientIp(req.headers);
   if (!chatRateLimiter.check(clientIp)) {
-    return Response.json(
-      { error: "You're sending messages quickly — try again shortly." },
-      { status: 429 },
-    );
+    return new Response("You're sending messages quickly — try again shortly.", {
+      status: 429,
+    });
   }
 
   const trimmed = trimHistory(parsed.messages);
