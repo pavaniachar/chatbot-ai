@@ -62,4 +62,16 @@ describe('SYSTEM_PROMPT', () => {
       expect(SYSTEM_PROMPT.toLowerCase()).toContain(industry);
     });
   });
+
+  it('states the industry count so the model never has to infer it', () => {
+    // Regression: the model previously answered "eight core industries" and
+    // then listed nine, anchoring on the "eight-pillar framework" phrase in
+    // the adjacent AI Maturity Index section. The count is now stated.
+    const industriesSection = SYSTEM_PROMPT.slice(
+      SYSTEM_PROMPT.indexOf('## Industries served'),
+      SYSTEM_PROMPT.indexOf('## The AI Maturity Index'),
+    );
+    expect(industriesSection.toLowerCase()).toContain('nine');
+    expect(industriesSection.toLowerCase()).not.toContain('eight');
+  });
 });
