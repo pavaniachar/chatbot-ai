@@ -28,8 +28,13 @@ export function MessageBubble({ role, text, isStreaming = false }: MessageBubble
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
       data-role={role}
-      className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}
+      className={`flex w-full items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
     >
+      {!isUser && (
+        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white">
+          CA
+        </div>
+      )}
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
           isUser
