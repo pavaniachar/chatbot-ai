@@ -111,16 +111,24 @@ routes to the form. Note the email domain is `gocadre.ai`, not `cadreai.com`.
 - **AI Engineering** (`/ai-engineering`) — automation and integration (data
   entry, document routing, email triage, report generation), multi-LLM support
   (Claude, OpenAI, Gemini, Mistral), n8n for orchestration.
-- **AI Agents** (`/agents`) — three tiers: prompts & assistants, voice agents,
-  fully-fledged agents with planning, multi-tool integration, and guardrails.
+- **AI Agents** (`/agents`) — three tiers: prompts & assistants, voice agents
+  (conversational AI handling intake, qualification, and support), fully-fledged
+  agents with planning, multi-tool integration, and guardrails.
 
 **AI Maturity Index**: scores a company across an **eight-pillar framework**
 (dedicated AI team, AI Command Center, AI-first culture, connected tech stack,
 AI-healthy data, AI agent readiness, departmental deep dives, 3-year vision).
-Delivers a grade per area with explanations plus improvement actions. It is also
-Phase 2 of the **45-Day AI Transformation Intensive**
+Delivers a grade per area with explanations plus improvement actions. Accessed
+via the "Get Your AI Results" / "Get Your AI Maturity Index" CTA, which is
+gated behind the same `/contact` inquiry form — no self-serve scoring link. It
+is also Phase 2 of the **45-Day AI Transformation Intensive**
 (`/ai-transformation-intensive`): Kickoff → AI Maturity Index → Full-Day
 Workshop → Use Case Library → Three-Year Vision → Twelve-Month Roadmap.
+
+**Client portal**: existing clients track tools, agents, training, and
+outcomes in the **"AI Results Dashboard"** (mentioned on the homepage). It is
+not self-signup — the homepage states it "requires contacting them to
+access," i.e. provisioned through the account team, not a public login page.
 
 **Industries** (9, each with its own page and positioning): professional
 services, private equity, real estate, financial services, mortgage & lending,
@@ -128,9 +136,13 @@ construction, retail & e-commerce, manufacturing & logistics, hospitality.
 
 **Case studies** (`/case-studies`) — eight engagements, clients non-disclosed,
 with quantified outcomes. Representative: 8,000+ hours saved annually on
-proposal automation; $420,000 saved annually on hospitality housing visibility;
-2,500 hours saved and 1–2 days cut to under 15 minutes on a mortgage Loan
-Intelligence Assistant; 57% daily efficiency gain in real estate scheduling.
+proposal automation; an AI-powered booking/occupancy-visibility system for a
+hospitality client saving $420,000 annually by eliminating same-day "flip day"
+incidents that had cost $1,000 per incident in expedited cleaning fees; a
+mortgage Loan Intelligence Assistant saving 2,500 hours annually and cutting
+loan processing from 1–2 days to under 15 minutes; and a real estate AI field
+scheduling platform (automated route optimization, territory-based assignment)
+lifting daily efficiency 57%.
 
 **Company** (`/about`): founded by Grayson Lafrenz (CEO), Riley Stricklin
 (Chief Strategy Officer), Chad Lohrli (Chief AI Officer); Keith Jensen
