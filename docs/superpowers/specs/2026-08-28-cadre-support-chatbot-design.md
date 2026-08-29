@@ -43,7 +43,8 @@ Confirmed by direct inspection rather than assumption:
 - **API key**: OpenRouter (`sk-or-v1-` prefix). Live check returned
   `limit: $5, usage: $0, expires_at: 2026-09-26` — 29 days out, not the 7 days
   originally assumed. The key outlives the review session.
-- **Model**: `anthropic/claude-haiku-4.5`, $1/M input, $5/M output, 200k context.
+- **Model**: `anthropic/claude-sonnet-4.5`, $3/M input, $15/M output.
+  (Verified alternatives: Haiku 4.5 at $1/$5, Opus 4.5 at $5/$25.)
 - **Package set**: `ai@7` + `@ai-sdk/react@4` + `@openrouter/ai-sdk-provider@3`
   + `zod`. The `@ai-sdk/react` package is versioned independently of `ai`
   (dist-tags: `ai-v5`→2.x, `ai-v6`→3.x, `latest`/v7→4.x). Its React peer range
@@ -55,12 +56,27 @@ Confirmed by direct inspection rather than assumption:
 
 ### Model selection rationale
 
-Support Q&A over a fixed knowledge base is an instruction-following task, not a
-reasoning-heavy one. Haiku 4.5 is chosen for **latency** — response speed is a
-UX feature in chat — not for price. At ~$0.004/turn (1.5k-token system prompt,
-6-message window, ~350-token replies), $5 covers roughly 1,200–1,400
-conversations, so cost is not the binding constraint. Anthropic via OpenRouter
-also mirrors Cadre's own stated partner stack.
+The model is selected by applying **Cadre's own published framework**
+(`/articles/ai-model-selection`) rather than an external rubric. That framework
+places customer service in the **Sonnet tier** and calls Sonnet "the practical
+default for the majority of AI-enabled workflows," reserving Haiku for
+classification, extraction, and templated responses, and Opus for high-stakes
+analysis. A support bot that must judge intent, decide when it is out of depth,
+and escalate deliberately is doing more than template-filling — so
+`anthropic/claude-sonnet-4.5` is the tier-consistent choice.
+
+At ~$0.020/turn (4k-token system prompt, 6-message window, ~350-token replies),
+$5 covers roughly 250 conversations — ample for demo, eval runs, and the review
+session. Haiku 4.5 was the initial pick and remains the documented fallback if
+budget tightens: ~$0.007/turn, ~760 conversations, at some cost to nuance.
+
+Serving Anthropic models via OpenRouter also mirrors Cadre's own stated stack —
+they name OpenRouter for model access, and `/ai-engineering` describes multi-LLM
+support across Claude, OpenAI, Gemini, and Mistral.
+
+**Prompt caching** is the main cost lever available: the ~4k-token knowledge
+base is static across every request, so caching it collapses the dominant input
+cost on repeat turns. Worth enabling if usage climbs.
 
 ## Knowledge base
 
@@ -68,34 +84,90 @@ Content sourced from cadreai.com, verified 2026-08-28, and compiled statically
 into the system prompt. No live fetching at request time — it keeps latency and
 cost down and removes a runtime network dependency.
 
-- **Services**: AI Strategy, AI Leadership & Facilitation, AI Engineering, AI Agents.
-- **Industries** (9): professional services, private equity, real estate,
-  financial services, mortgage & lending, construction, retail & e-commerce,
-  manufacturing & logistics, hospitality.
-- **Booking**: "Talk to an AI Strategist" CTA → `/contact`.
-- **AI Maturity Index**: eight-pillar scoring framework, accessed via `/contact`.
-- **Client portal**: "AI Results Dashboard" — tracks tools, agents, training,
-  and outcomes.
-- **Case studies**: `/case-studies` (iSupport, private equity engagements;
-  cost savings and process optimization).
-- **Pricing**: not publicly disclosed; custom engagement model.
-- **Partners**: OpenAI, Anthropic, Google, Microsoft, AWS, Salesforce,
-  Snowflake; OpenRouter for model access.
+Source pages were enumerated from `sitemap.xml` (107 URLs; `robots.txt` permits
+crawling) and the highest-value pages fetched individually rather than
+summarizing the homepage alone.
+
+> **Correction:** an initial homepage-only summary attributed a case study to a
+> client named "iSupport." The actual `/case-studies` page shows eight
+> engagements with **non-disclosed** clients. That name was removed. It is the
+> reason the knowledge base is built from primary pages, not summaries — a
+> fabricated client name in the KB would have been repeated as fact by the bot.
+
+**Contact** (`/contact`): form fields Full Name, Email, Subject, Message.
+Email `hello@gocadre.ai`, phone (619) 324-3223, office 3580 Carmel Mountain Rd
+#150, San Diego, CA 92130. No public calendar link — "Talk to an AI Strategist"
+routes to the form. Note the email domain is `gocadre.ai`, not `cadreai.com`.
+
+**Services** (one page each):
+- **AI Strategy** (`/strategy`) — four phases: Discover Use Cases, Survey the
+  Landscape, Implement Solutions, Scale with Confidence. *"We don't deliver
+  massive slide decks and walk away. We find quick wins that create measurable
+  EBITDA impact."*
+- **AI Leadership & Facilitation** (`/leadership-facilitation`) — formats:
+  2-day intensive, 1-day workshop, half-day executive session, 1-hour virtual
+  kickoff. Split 30% teaching / 30% interaction / 40% application on the
+  client's real challenges; participants leave with 3–5 identified opportunities.
+- **AI Engineering** (`/ai-engineering`) — automation and integration (data
+  entry, document routing, email triage, report generation), multi-LLM support
+  (Claude, OpenAI, Gemini, Mistral), n8n for orchestration.
+- **AI Agents** (`/agents`) — three tiers: prompts & assistants, voice agents,
+  fully-fledged agents with planning, multi-tool integration, and guardrails.
+
+**AI Maturity Index**: scores a company across an **eight-pillar framework**
+(dedicated AI team, AI Command Center, AI-first culture, connected tech stack,
+AI-healthy data, AI agent readiness, departmental deep dives, 3-year vision).
+Delivers a grade per area with explanations plus improvement actions. It is also
+Phase 2 of the **45-Day AI Transformation Intensive**
+(`/ai-transformation-intensive`): Kickoff → AI Maturity Index → Full-Day
+Workshop → Use Case Library → Three-Year Vision → Twelve-Month Roadmap.
+
+**Industries** (9, each with its own page and positioning): professional
+services, private equity, real estate, financial services, mortgage & lending,
+construction, retail & e-commerce, manufacturing & logistics, hospitality.
+
+**Case studies** (`/case-studies`) — eight engagements, clients non-disclosed,
+with quantified outcomes. Representative: 8,000+ hours saved annually on
+proposal automation; $420,000 saved annually on hospitality housing visibility;
+2,500 hours saved and 1–2 days cut to under 15 minutes on a mortgage Loan
+Intelligence Assistant; 57% daily efficiency gain in real estate scheduling.
+
+**Company** (`/about`): founded by Grayson Lafrenz (CEO), Riley Stricklin
+(Chief Strategy Officer), Chad Lohrli (Chief AI Officer); Keith Jensen
+(President), Ben Shapiro (Head of AI Strategy). 100+ high-ROI use cases across
+50+ companies. "The Cadre Way": growth mindset, extreme ownership, teamwork,
+scrappiness.
+
+**Pricing**: not publicly disclosed anywhere on the site; custom engagement model.
 
 ### Handling the security question
 
-The brief asks the bot to field questions on "LLM selection and data security."
-cadreai.com publishes nothing on security posture. The bot therefore:
+Scenario 5 ("LLM selection and data security") is answerable from real published
+content on both halves:
 
-- **Answers the model-selection half substantively** — model-agnostic approach
-  via OpenRouter, selection matched to the use case, major-provider ecosystem.
-- **Declines the compliance half explicitly** — no claims about DPAs, SOC 2,
-  data residency, retention, or training-on-client-data, and routes the user to
-  a human instead.
+- **Model selection** (`/articles/ai-model-selection`) — Cadre publishes a
+  **tiered selection framework** driven by task type/complexity, cost
+  efficiency, and performance requirements: Haiku for classification,
+  extraction, templated responses; Sonnet for writing, multi-step analysis, and
+  customer service ("the practical default for the majority of AI-enabled
+  workflows"); Opus for due diligence and high-stakes work. Their position:
+  using one model for every task is poor governance, and ~60–70% of business
+  workflows belong in the Haiku or Sonnet tier.
+- **Data security** — `/ai-engineering` states client **"data is never used to
+  train other models"** and addresses preventing employees from sharing company
+  secrets on personal LLMs. `/legal/privacy-policy` gives a **2-year standard
+  retention** period, "appropriate technical and organisational measures," and
+  data subject rights (access, correct, delete, restrict) via
+  `privacy@gocadre.ai`.
 
-Fabricated security and compliance claims are the highest-liability hallucination
-class a support bot can produce. Declining them is a deliberate product decision,
-not a capability gap.
+**Still explicitly declined**, because the site genuinely does not address them:
+SOC 2 / GDPR / CCPA certification status, subprocessor lists, and DPA terms.
+The privacy policy names no compliance framework. The bot states what is
+published, then routes these to a human rather than inferring.
+
+Fabricated security and compliance claims are the highest-liability
+hallucination class a support bot can produce. Declining the unpublished
+specifics is a deliberate product decision, not a capability gap.
 
 ## Architecture
 
