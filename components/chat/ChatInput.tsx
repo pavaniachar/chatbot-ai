@@ -39,12 +39,12 @@ export function ChatInput({ onSubmit, disabled = false }: ChatInputProps) {
         disabled={disabled}
         rows={1}
         placeholder="Ask about Cadre AI's services, pricing, or how to get started..."
-        className="flex-1 resize-none rounded-2xl border border-zinc-300 bg-white px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400 disabled:opacity-50"
+        className="min-w-0 flex-1 resize-none truncate rounded-2xl border border-zinc-300 bg-white px-3.5 py-2.5 text-base text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-400 disabled:opacity-50 sm:text-sm"
       />
       <button
         type="submit"
         disabled={disabled || !value.trim()}
-        className="rounded-full bg-zinc-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40"
+        className="shrink-0 rounded-full bg-zinc-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Send
       </button>
