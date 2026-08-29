@@ -1,7 +1,15 @@
 'use client';
 
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import { motion } from 'framer-motion';
+
+const markdownComponents: Components = {
+  a: ({ href, children }) => (
+    <a href={href} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  ),
+};
 
 export interface MessageBubbleProps {
   role: 'user' | 'assistant';
@@ -22,12 +30,12 @@ export function MessageBubble({ role, text, isStreaming = false }: MessageBubble
       <div
         className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
           isUser
-            ? 'bg-zinc-600 text-white'
+            ? 'bg-zinc-200 text-zinc-900'
             : 'border border-zinc-200 bg-zinc-50 text-zinc-800'
         }`}
       >
         <div className="[&_p]:my-1 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_a]:underline">
-          <ReactMarkdown>{text}</ReactMarkdown>
+          <ReactMarkdown components={markdownComponents}>{text}</ReactMarkdown>
         </div>
         {isStreaming && (
           <span
