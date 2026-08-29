@@ -4,11 +4,14 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import { motion } from 'framer-motion';
 
 const markdownComponents: Components = {
-  a: ({ href, children }) => (
-    <a href={href} target="_blank" rel="noopener noreferrer">
-      {children}
-    </a>
-  ),
+  a: ({ href, children }) => {
+    const isExternal = !!href && !href.startsWith('mailto:') && !href.startsWith('tel:');
+    return (
+      <a href={href} target={isExternal ? '_blank' : undefined} rel={isExternal ? 'noopener noreferrer' : undefined}>
+        {children}
+      </a>
+    );
+  },
 };
 
 export interface MessageBubbleProps {

@@ -1,7 +1,7 @@
 import { APICallError } from 'ai';
 
 const CONTACT_NOTICE =
-  'You can reach a Cadre AI strategist directly at hello@gocadre.ai or through the contact form on cadreai.com.';
+  'You can reach a Cadre AI strategist directly at hello@gocadre.ai or through the [contact form on cadreai.com](https://cadreai.com/contact).';
 
 export function mapErrorToUserMessage(error: unknown): string {
   console.error('[chat] provider error', error);
