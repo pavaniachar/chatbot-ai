@@ -43,6 +43,46 @@ export class ChatPage {
   }
 
   /**
+   * Scroll state of the message list and everything above it.
+   *
+   * `displacedAncestors` is the load-bearing one: the list lives inside
+   * `overflow: hidden` wrappers, which are invisible to the user but still
+   * scrollable from script. Anything that scrolls one drags the conversation
+   * off the card and leaves a blank panel behind.
+   */
+  async scrollState(): Promise<{
+    displacedAncestors: string[];
+    latestMessageOnScreen: boolean;
+    logBand: string;
+  }> {
+    return this.page.evaluate(() => {
+      const log = document.querySelector('[role="log"]') as HTMLElement | null;
+      if (!log) throw new Error('message list is not rendered');
+
+      const displacedAncestors: string[] = [];
+      for (let el = log.parentElement; el && el.tagName !== 'HTML'; el = el.parentElement) {
+        if (Math.round(el.scrollTop) !== 0) {
+          displacedAncestors.push(
+            `<${el.tagName.toLowerCase()} class="${(el.className || '').slice(0, 45)}"> ` +
+              `scrollTop=${Math.round(el.scrollTop)}`,
+          );
+        }
+      }
+
+      const band = log.getBoundingClientRect();
+      const bubbles = [...document.querySelectorAll('[data-role]')] as HTMLElement[];
+      const last = bubbles.at(-1)?.getBoundingClientRect();
+
+      return {
+        displacedAncestors,
+        latestMessageOnScreen:
+          !!last && last.bottom > band.top + 1 && last.top < band.bottom - 1,
+        logBand: `${Math.round(band.top)}..${Math.round(band.bottom)}`,
+      };
+    });
+  }
+
+  /**
    * The chat window is still mounted and usable. A React throw during render
    * unmounts the whole client tree, so this failing is the blank-page symptom.
    */

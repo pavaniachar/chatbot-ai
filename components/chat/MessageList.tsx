@@ -28,7 +28,6 @@ export interface MessageListProps {
 }
 
 export function MessageList({ messages, status }: MessageListProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
@@ -36,13 +35,24 @@ export function MessageList({ messages, status }: MessageListProps) {
   // without re-running when it changes, which would itself trigger a scroll.
   const isPinnedToBottomRef = useRef(true);
 
+  // Scrolls the conversation panel and nothing else. `scrollIntoView` would be
+  // the obvious call here, but it scrolls *every* scrollable ancestor — and an
+  // `overflow: hidden` wrapper still scrolls from script. Once the thread grew
+  // past a few turns that dragged the whole list up out of the chat card,
+  // leaving the header and composer framing a blank panel.
+  const scrollToLatest = () => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     // Streaming produces a new `messages` array per token, so this effect runs
     // on every delta. Following the stream is only wanted while the reader is
     // already at the bottom — otherwise each token would yank them back down
     // mid-sentence while they scroll up to re-read an earlier reply.
     if (!isPinnedToBottomRef.current) return;
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToLatest();
   }, [messages, status]);
 
   const handleScroll = () => {
@@ -60,13 +70,13 @@ export function MessageList({ messages, status }: MessageListProps) {
     // never follow the stream again.
     isPinnedToBottomRef.current = true;
     setShowScrollButton(false);
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollToLatest();
   };
 
   const visibleMessages = messages.filter(isDisplayMessage);
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 z-10 h-6 bg-gradient-to-b from-white to-transparent"
@@ -77,7 +87,7 @@ export function MessageList({ messages, status }: MessageListProps) {
         role="log"
         aria-live="polite"
         aria-label="Conversation with Cadre AI support assistant"
-        className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4"
+        className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-4"
       >
         {visibleMessages.map((message, index) => (
           <MessageBubble
@@ -94,7 +104,6 @@ export function MessageList({ messages, status }: MessageListProps) {
         <AnimatePresence>
           {status === 'submitted' && <TypingIndicator key="typing" />}
         </AnimatePresence>
-        <div ref={bottomRef} />
       </div>
       <AnimatePresence>
         {showScrollButton && (

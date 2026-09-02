@@ -34,7 +34,7 @@ export function ChatWindow() {
     <MotionConfig reducedMotion="user">
       <div className="flex h-dvh w-full flex-col overflow-hidden bg-white sm:h-[85dvh] sm:max-h-[820px] sm:w-full sm:max-w-2xl sm:rounded-3xl sm:border sm:border-zinc-200 sm:shadow-xl sm:shadow-zinc-900/10">
         <ChatHeader onReset={handleReset} />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {messages.length === 0 ? (
             <SuggestedPrompts onSelect={handleSubmit} />
           ) : (

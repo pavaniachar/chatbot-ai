@@ -7,8 +7,11 @@ afterEach(() => {
   cleanup();
 });
 
-// jsdom does not implement scrollIntoView; MessageList calls it on every
+// jsdom implements neither; MessageList scrolls its own container on every
 // message update to auto-scroll.
+if (!Element.prototype.scrollTo) {
+  Element.prototype.scrollTo = () => {};
+}
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }

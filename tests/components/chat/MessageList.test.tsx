@@ -57,23 +57,24 @@ describe('MessageList', () => {
   });
 
   describe('auto-scroll', () => {
-    let scrollIntoView: ReturnType<typeof vi.spyOn>;
+    // The list scrolls its own container rather than calling `scrollIntoView`,
+    // which would also scroll the `overflow: hidden` wrappers around it and
+    // drag the conversation off the chat card.
+    let scrollTo: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
-      scrollIntoView = vi
-        .spyOn(Element.prototype, 'scrollIntoView')
-        .mockImplementation(() => {});
+      scrollTo = vi.spyOn(Element.prototype, 'scrollTo').mockImplementation(() => {});
     });
 
     afterEach(() => {
-      scrollIntoView.mockRestore();
+      scrollTo.mockRestore();
     });
 
     it('follows new messages while the reader is at the bottom', () => {
       const messages = [textMessage('1', 'user', 'Hi')];
       const { rerender } = render(<MessageList messages={messages} status="streaming" />);
 
-      scrollIntoView.mockClear();
+      scrollTo.mockClear();
       rerender(
         <MessageList
           messages={[...messages, textMessage('2', 'assistant', 'Hello')]}
@@ -81,7 +82,7 @@ describe('MessageList', () => {
         />,
       );
 
-      expect(scrollIntoView).toHaveBeenCalled();
+      expect(scrollTo).toHaveBeenCalled();
     });
 
     it('stops following once the reader scrolls up to read earlier replies', () => {
@@ -89,7 +90,7 @@ describe('MessageList', () => {
       const { rerender } = render(<MessageList messages={messages} status="streaming" />);
 
       setScrollPosition(screen.getByRole('log'), SCROLLED_UP);
-      scrollIntoView.mockClear();
+      scrollTo.mockClear();
 
       // A streamed token arrives while the reader is still scrolled up.
       rerender(
@@ -99,7 +100,7 @@ describe('MessageList', () => {
         />,
       );
 
-      expect(scrollIntoView).not.toHaveBeenCalled();
+      expect(scrollTo).not.toHaveBeenCalled();
     });
 
     it('resumes following after the reader jumps back to the latest message', () => {
@@ -108,7 +109,7 @@ describe('MessageList', () => {
 
       setScrollPosition(screen.getByRole('log'), SCROLLED_UP);
       fireEvent.click(screen.getByRole('button', { name: /jump to latest/i }));
-      scrollIntoView.mockClear();
+      scrollTo.mockClear();
 
       rerender(
         <MessageList
@@ -117,7 +118,7 @@ describe('MessageList', () => {
         />,
       );
 
-      expect(scrollIntoView).toHaveBeenCalled();
+      expect(scrollTo).toHaveBeenCalled();
     });
 
     it('hides the jump affordance once the reader is back at the bottom', async () => {
