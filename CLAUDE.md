@@ -45,9 +45,24 @@ static knowledge base, and escalates to a human for anything outside it.
 
 ## Testing
 
-Vitest + React Testing Library, config in `vitest.config.mts`. Run `npm test`
-for a single run or `npm run test:watch` while developing. Tests live in
-`tests/`, mirroring the `lib/` and `components/` structure.
+Two layers, kept separate:
+
+**Unit** — Vitest + React Testing Library, config in `vitest.config.mts`. Run
+`npm test` for a single run or `npm run test:watch` while developing. Tests
+live in `tests/`, mirroring the `lib/` and `components/` structure.
+
+**End-to-end** — Playwright, config in `playwright.config.ts`, specs in `e2e/`.
+Run `npm run test:e2e` (or `npm run test:e2e:ui`). The suite builds the app and
+serves it on port 3100, so it never collides with a `npm run dev` on 3000, and
+it route-intercepts `/api/chat` in the browser — the real handler never runs, no
+`OPENROUTER_API_KEY` is needed, and no OpenRouter budget is spent. Scripted
+replies are built with the AI SDK stream helpers in `e2e/helpers/`.
+
+Every e2e test carries a page-error guard (`e2e/helpers/fixtures.ts`) that fails
+on any uncaught exception or console error. That guard is the point of the
+suite: a throw during render unmounts the whole client tree and blanks the
+page, and nothing in the unit tests would notice. When adding an e2e test,
+assert `expectStillAlive()` after anything that could go wrong.
 
 ## Deployment
 

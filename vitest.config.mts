@@ -7,5 +7,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    // Unit tests only. `e2e/` holds Playwright specs, which Vitest would
+    // otherwise collect and fail to run.
+    include: ['tests/**/*.test.{ts,tsx}'],
   },
 });
